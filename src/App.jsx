@@ -267,9 +267,39 @@ function Modal({ form, setForm, onSave, onClose, isEdit }) {
 }
 
 /* ── Main App ── */
+/* ── Reset helpers ── */
+function getTodayKey()  { const d = new Date(); return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`; }
+function getWeekKey()   { const d = new Date(); const day = d.getDay(); const diff = day === 0 ? -6 : 1 - day; const monday = new Date(d); monday.setDate(d.getDate() + diff); return `${monday.getFullYear()}-${monday.getMonth()}-${monday.getDate()}`; }
+function getMonthKey()  { const d = new Date(); return `${d.getFullYear()}-${d.getMonth()}`; }
+
+function shouldReset(type) {
+  const stored = localStorage.getItem(`taskflow_reset_${type}`);
+  const current = type === "daily" ? getTodayKey() : type === "weekly" ? getWeekKey() : getMonthKey();
+  return stored !== current;
+}
+function markReset(type) {
+  const current = type === "daily" ? getTodayKey() : type === "weekly" ? getWeekKey() : getMonthKey();
+  localStorage.setItem(`taskflow_reset_${type}`, current);
+}
+
+function applyAutoResets(tasks) {
+  const types = ["daily", "weekly", "monthly"];
+  const toReset = types.filter(shouldReset);
+  if (toReset.length === 0) return tasks;
+  toReset.forEach(markReset);
+  return tasks.map(t =>
+    toReset.includes(t.type) && t.status === "done"
+      ? { ...t, status: "pending" }
+      : t
+  );
+}
+
 export default function App() {
   const [tasks, setTasks] = useState(() => {
-    try { return JSON.parse(localStorage.getItem("taskflow_v2") || "[]"); } catch { return []; }
+    try {
+      const saved = JSON.parse(localStorage.getItem("taskflow_v2") || "[]");
+      return applyAutoResets(saved);
+    } catch { return []; }
   });
   const [filterType, setFilterType] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
@@ -280,6 +310,17 @@ export default function App() {
   const [form, setForm] = useState({ title:"", desc:"", type:"daily", status:"pending" });
 
   useEffect(() => { localStorage.setItem("taskflow_v2", JSON.stringify(tasks)); }, [tasks]);
+
+  /* Check resets whenever tab becomes visible again */
+  useEffect(() => {
+    const onVisible = () => {
+      if (document.visibilityState === "visible") {
+        setTasks(prev => applyAutoResets([...prev]));
+      }
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => document.removeEventListener("visibilitychange", onVisible);
+  }, []);
 
   const celebrate = () => {
     const m = MOTIVATIONS[Math.floor(Math.random() * MOTIVATIONS.length)];
