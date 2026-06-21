@@ -405,7 +405,7 @@ export default function App() {
       setTasks(p => p.map(t => t.id === editId ? { ...t, ...form } : t));
       if (old?.status !== "done" && form.status === "done") celebrate();
     } else {
-      setTasks(p => [{ id: Date.now(), ...form, createdAt: new Date().toISOString() }, ...p]);
+      setTasks(p => [{ id: crypto.randomUUID(), ...form, createdAt: new Date().toISOString() }, ...p]);
       if (form.status === "done") celebrate();
     }
     setShowModal(false);
