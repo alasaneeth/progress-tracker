@@ -5,6 +5,7 @@ import Header from "./components/Header";
 import StatCards from "./components/StatCards";
 import ProgressBar from "./components/ProgressBar";
 import FilterTabs from "./components/FilterTabs";
+import SearchBar from "./components/SearchBar";
 import TaskList from "./components/TaskList";
 import Modal from "./components/Modal";
 
@@ -12,9 +13,10 @@ export default function App() {
   const {
     filtered, total, done, inprogress, pending,
     confetti, motivation,
-    showModal, form, setForm,
-    filterType, setFilterType,
+    showModal, form, setForm, editId,
+    filterType,   setFilterType,
     filterStatus, setFilterStatus,
+    searchQuery,  setSearchQuery,
     openAdd, openEdit, closeModal,
     saveTask, updateStatus, deleteTask,
     handleDragEnd,
@@ -34,6 +36,7 @@ export default function App() {
             filterType={filterType}     setFilterType={setFilterType}
             filterStatus={filterStatus} setFilterStatus={setFilterStatus}
           />
+          <SearchBar query={searchQuery} setQuery={setSearchQuery} />
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             <TaskList
               filtered={filtered} total={total}
@@ -48,7 +51,7 @@ export default function App() {
         <Modal
           form={form} setForm={setForm}
           onSave={saveTask} onClose={closeModal}
-          isEdit={!!form.editId}
+          isEdit={!!editId}
         />
       )}
     </>
