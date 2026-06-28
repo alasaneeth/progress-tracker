@@ -18,7 +18,7 @@ export default function useTasks() {
   const [editId,       setEditId]       = useState(null);
   const [confetti,     setConfetti]     = useState(false);
   const [motivation,   setMotivation]   = useState(null);
-  const [form, setForm] = useState({ title: "", desc: "", type: "daily", status: "pending" });
+  const [form, setForm] = useState({ title: "", desc: "", type: "daily", status: "pending", dueDate: "" });
 
   /* ── Persist to localStorage ── */
   useEffect(() => {
@@ -57,13 +57,13 @@ export default function useTasks() {
 
   /* ── Modal ── */
   const openAdd = () => {
-    setForm({ title: "", desc: "", type: "daily", status: "pending" });
+    setForm({ title: "", desc: "", type: "daily", status: "pending", dueDate: "" });
     setEditId(null);
     setShowModal(true);
   };
 
   const openEdit = (task) => {
-    setForm({ title: task.title, desc: task.desc || "", type: task.type, status: task.status });
+    setForm({ title: task.title, desc: task.desc || "", type: task.type, status: task.status, dueDate: task.dueDate || "" });
     setEditId(task.id);
     setShowModal(true);
   };

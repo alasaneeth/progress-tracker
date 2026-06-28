@@ -1,16 +1,30 @@
 import { TYPE_META, STATUS_META } from "../constants/meta";
 
+function getDueDateInfo(dueDate, isDone) {
+  if (!dueDate || isDone) return null;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const due = new Date(dueDate);
+  const diffDays = Math.ceil((due - today) / (1000 * 60 * 60 * 24));
+
+  if (diffDays < 0)  return { label: `Overdue by ${Math.abs(diffDays)}d`, color: "#f87171", bg: "#2d0f0f", border: "#5c1a1a", icon: "🚨" };
+  if (diffDays === 0) return { label: "Due Today",                         color: "#fbbf24", bg: "#2d1f0a", border: "#5c3a10", icon: "⚠️" };
+  if (diffDays === 1) return { label: "Due Tomorrow",                      color: "#fbbf24", bg: "#2d1f0a", border: "#5c3a10", icon: "📅" };
+  return                     { label: `Due in ${diffDays}d`,               color: "#34d399", bg: "#0a2d1f", border: "#0f5c3a", icon: "📅" };
+}
+
 export default function TaskCard({ task, onStatus, onEdit, onDelete }) {
   const type = TYPE_META[task.type];
   const status = STATUS_META[task.status];
   const statusOrder = ["pending", "inprogress", "done"];
   const isDone = task.status === "done";
+  const dueDateInfo = getDueDateInfo(task.dueDate, isDone);
 
   return (
     <div
       style={{
         background: "#111118",
-        border: "1px solid #1e1e2e",
+        border: `1px solid ${dueDateInfo?.color === "#f87171" ? "#3d1515" : "#1e1e2e"}`,
         borderRadius: 16,
         overflow: "hidden",
         transition: "transform 0.18s, box-shadow 0.18s, border-color 0.18s",
@@ -24,7 +38,7 @@ export default function TaskCard({ task, onStatus, onEdit, onDelete }) {
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.transform = "translateY(0)";
-        e.currentTarget.style.borderColor = "#1e1e2e";
+        e.currentTarget.style.borderColor = dueDateInfo?.color === "#f87171" ? "#3d1515" : "#1e1e2e";
         e.currentTarget.style.boxShadow = "none";
       }}
     >
@@ -66,6 +80,20 @@ export default function TaskCard({ task, onStatus, onEdit, onDelete }) {
             >
               {status.icon} {status.label}
             </span>
+
+            {/* Due Date Badge */}
+            {dueDateInfo && (
+              <span
+                style={{
+                  fontSize: 11, fontWeight: 600, padding: "3px 10px",
+                  borderRadius: 100, background: dueDateInfo.bg,
+                  color: dueDateInfo.color, border: `1px solid ${dueDateInfo.border}`,
+                  letterSpacing: "0.03em",
+                }}
+              >
+                {dueDateInfo.icon} {dueDateInfo.label}
+              </span>
+            )}
           </div>
 
           <div style={{ display: "flex", gap: 4, flexShrink: 0 }}>
