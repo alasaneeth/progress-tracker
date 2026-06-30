@@ -1,4 +1,4 @@
-# ⚡ TaskFlow
+# ⚡ progress-tracker
 
 A bilingual (Tamil + English) personal task manager built with React. Organize daily, weekly, and monthly tasks with drag-and-drop reordering, search, due dates, and a satisfying celebration UX when tasks get done.
 
@@ -117,8 +117,3 @@ release(vX.Y.Z): summary of what's shipping to main
 
 All data is stored client-side in `localStorage` under the key `taskflow_v2`. No backend, no account, no sync across devices — your tasks live in your browser.
 
----
-
-## 📄 License
-
-Personal project — license to be decided.
