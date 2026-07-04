@@ -56,14 +56,46 @@ export default function useTasks() {
   };
 
   /* ── Drag & Drop ── */
+  const COLUMN_IDS = ["pending", "inprogress", "done"];
+
   const handleDragEnd = (event) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
-    setTasks((prev) => {
-      const oldIndex = prev.findIndex((t) => t.id === active.id);
-      const newIndex = prev.findIndex((t) => t.id === over.id);
-      return arrayMove(prev, oldIndex, newIndex);
-    });
+
+    const isDroppedOnColumn = COLUMN_IDS.includes(over.id);
+
+    if (isDroppedOnColumn) {
+      // Dropped on a column → status change
+      const newStatus = over.id;
+      const task = tasks.find((t) => t.id === active.id);
+      if (!task || task.status === newStatus) return;
+      updateStatus(active.id, newStatus);
+    } else {
+      // Dropped on another card
+      const activeTask = tasks.find((t) => t.id === active.id);
+      const overTask   = tasks.find((t) => t.id === over.id);
+      if (!activeTask || !overTask) return;
+
+      if (activeTask.status !== overTask.status) {
+        // Cross-column drop → change status + reorder
+        setTasks((prev) => {
+          const updated = prev.map((t) =>
+            t.id === active.id ? { ...t, status: overTask.status } : t
+          );
+          const oldIndex = updated.findIndex((t) => t.id === active.id);
+          const newIndex = updated.findIndex((t) => t.id === over.id);
+          return arrayMove(updated, oldIndex, newIndex);
+        });
+        if (activeTask.status !== "done" && overTask.status === "done") celebrate();
+      } else {
+        // Same column → reorder only
+        setTasks((prev) => {
+          const oldIndex = prev.findIndex((t) => t.id === active.id);
+          const newIndex = prev.findIndex((t) => t.id === over.id);
+          return arrayMove(prev, oldIndex, newIndex);
+        });
+      }
+    }
   };
 
   /* ── Modal ── */
