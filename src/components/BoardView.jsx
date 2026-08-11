@@ -20,6 +20,7 @@ export default function BoardView({
   onEdit,
   onDelete,
   onAdd,
+  onToggleSubtask,
 }) {
   const sensors = useSensors(useSensor(PointerSensor));
   const [activeTask, setActiveTask] = useState(null);
@@ -95,6 +96,7 @@ export default function BoardView({
             onStatus={onStatus}
             onEdit={onEdit}
             onDelete={onDelete}
+            onToggleSubtask={onToggleSubtask}
           />
         ))}
       </div>

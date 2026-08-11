@@ -1,4 +1,30 @@
+import { useState } from "react";
+
 export default function Modal({ form, setForm, onSave, onClose, isEdit }) {
+  const [subtaskInput, setSubtaskInput] = useState("");
+  const subtasks = form.subtasks || [];
+
+  const addSubtask = () => {
+    const title = subtaskInput.trim();
+    if (!title) return;
+    setForm((f) => ({
+      ...f,
+      subtasks: [...(f.subtasks || []), { id: crypto.randomUUID(), title, done: false }],
+    }));
+    setSubtaskInput("");
+  };
+
+  const removeSubtask = (id) => {
+    setForm((f) => ({ ...f, subtasks: (f.subtasks || []).filter((s) => s.id !== id) }));
+  };
+
+  const toggleSubtaskDone = (id) => {
+    setForm((f) => ({
+      ...f,
+      subtasks: (f.subtasks || []).map((s) => (s.id === id ? { ...s, done: !s.done } : s)),
+    }));
+  };
+
   const inputStyle = {
     width: "100%",
     background: "#0d0d14",
@@ -45,6 +71,8 @@ export default function Modal({ form, setForm, onSave, onClose, isEdit }) {
           padding: "24px",
           width: "100%",
           maxWidth: 420,
+          maxHeight: "88vh",
+          overflowY: "auto",
           boxShadow: "0 32px 80px rgba(0,0,0,0.7)",
           animation: "modalIn 0.25s cubic-bezier(0.34,1.4,0.64,1)",
         }}
@@ -164,8 +192,95 @@ export default function Modal({ form, setForm, onSave, onClose, isEdit }) {
           onBlur={(e) => (e.target.style.borderColor = "#2a2a3e")}
         />
 
+        {/* Subtasks */}
+        <label style={labelStyle}>
+          Subtasks{" "}
+          <span style={{ color: "#374151", textTransform: "none", letterSpacing: 0 }}>
+            (optional)
+          </span>
+        </label>
+
+        {subtasks.length > 0 && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 10 }}>
+            {subtasks.map((s) => (
+              <div
+                key={s.id}
+                style={{
+                  display: "flex", alignItems: "center", gap: 8,
+                  background: "#0d0d14", border: "1px solid #2a2a3e",
+                  borderRadius: 8, padding: "7px 10px",
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={s.done}
+                  onChange={() => toggleSubtaskDone(s.id)}
+                  style={{ cursor: "pointer", accentColor: "#1d4ed8" }}
+                />
+                <span
+                  style={{
+                    flex: 1, fontSize: 12.5,
+                    color: s.done ? "#374151" : "#cbd5e1",
+                    textDecoration: s.done ? "line-through" : "none",
+                    wordBreak: "break-word",
+                  }}
+                >
+                  {s.title}
+                </span>
+                <button
+                  onClick={() => removeSubtask(s.id)}
+                  title="Remove subtask"
+                  style={{
+                    background: "transparent", border: "none", color: "#4b5563",
+                    cursor: "pointer", fontSize: 14, lineHeight: 1, padding: 2,
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = "#f87171")}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = "#4b5563")}
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div style={{ display: "flex", gap: 8, marginBottom: 22 }}>
+          <input
+            style={inputStyle}
+            placeholder="Add a subtask..."
+            value={subtaskInput}
+            onChange={(e) => setSubtaskInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                addSubtask();
+              }
+            }}
+            onFocus={(e) => (e.target.style.borderColor = "#60a5fa")}
+            onBlur={(e) => (e.target.style.borderColor = "#2a2a3e")}
+          />
+          <button
+            onClick={addSubtask}
+            style={{
+              flexShrink: 0, background: "#1a1a2e", border: "1px solid #2a2a3e",
+              borderRadius: 10, padding: "0 16px", fontSize: 13, fontWeight: 600,
+              color: "#93c5fd", cursor: "pointer", fontFamily: "inherit",
+            }}
+          >
+            Add
+          </button>
+        </div>
+
         {/* Actions */}
-        <div style={{ display: "flex", gap: 10 }}>
+        <div
+          style={{
+            display: "flex", gap: 10,
+            position: "sticky", bottom: 0,
+            background: "#111118",
+            paddingTop: 6, paddingBottom: 4,
+            marginTop: 4,
+          }}
+        >
           <button
             onClick={onClose}
             style={{
