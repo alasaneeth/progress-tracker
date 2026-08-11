@@ -43,13 +43,20 @@ export function applyAutoResets(tasks) {
   const toReset = types.filter(shouldReset);
   if (toReset.length === 0) return tasks;
   toReset.forEach(markReset);
-  return tasks.map((t) =>
-    toReset.includes(t.type) && t.status === "done"
-      ? {
-          ...t,
-          status: "pending",
-          subtasks: (t.subtasks || []).map((s) => ({ ...s, done: false })),
-        }
-      : t
-  );
+  return tasks.map((t) => {
+    if (!toReset.includes(t.type)) return t;
+
+    // Recurring task rolled over to a new period:
+    // - if it was marked done, bring it back to pending
+    // - always clear subtask checkmarks, regardless of status,
+    //   so half-finished checklists don't carry over
+    const hasSubtasks = (t.subtasks || []).length > 0;
+    if (t.status !== "done" && !hasSubtasks) return t;
+
+    return {
+      ...t,
+      status: t.status === "done" ? "pending" : t.status,
+      subtasks: hasSubtasks ? t.subtasks.map((s) => ({ ...s, done: false })) : t.subtasks,
+    };
+  });
 }
