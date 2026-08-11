@@ -20,7 +20,7 @@ export default function useTasks() {
   const [editId,       setEditId]       = useState(null);
   const [confetti,     setConfetti]     = useState(false);
   const [motivation,   setMotivation]   = useState(null);
-  const [form, setForm] = useState({ title: "", desc: "", type: "daily", status: "pending", dueDate: "" });
+  const [form, setForm] = useState({ title: "", desc: "", type: "daily", status: "pending", dueDate: "", subtasks: [] });
 
   /* ── Undo delete ── */
   const [pendingDelete, setPendingDelete] = useState(null); // { task, index }
@@ -100,13 +100,20 @@ export default function useTasks() {
 
   /* ── Modal ── */
   const openAdd = () => {
-    setForm({ title: "", desc: "", type: "daily", status: "pending", dueDate: "" });
+    setForm({ title: "", desc: "", type: "daily", status: "pending", dueDate: "", subtasks: [] });
     setEditId(null);
     setShowModal(true);
   };
 
   const openEdit = (task) => {
-    setForm({ title: task.title, desc: task.desc || "", type: task.type, status: task.status, dueDate: task.dueDate || "" });
+    setForm({
+      title: task.title,
+      desc: task.desc || "",
+      type: task.type,
+      status: task.status,
+      dueDate: task.dueDate || "",
+      subtasks: task.subtasks || [],
+    });
     setEditId(task.id);
     setShowModal(true);
   };
@@ -125,6 +132,35 @@ export default function useTasks() {
       if (form.status === "done") celebrate();
     }
     setShowModal(false);
+  };
+
+  /* ── Subtasks (within the modal form, before save) ── */
+  const addFormSubtask = (title) => {
+    if (!title.trim()) return;
+    setForm((f) => ({
+      ...f,
+      subtasks: [...(f.subtasks || []), { id: crypto.randomUUID(), title: title.trim(), done: false }],
+    }));
+  };
+
+  const removeFormSubtask = (subtaskId) => {
+    setForm((f) => ({ ...f, subtasks: (f.subtasks || []).filter((s) => s.id !== subtaskId) }));
+  };
+
+  /* ── Subtasks (on an existing task, from the card) ── */
+  const toggleSubtask = (taskId, subtaskId) => {
+    setTasks((p) =>
+      p.map((t) =>
+        t.id === taskId
+          ? {
+              ...t,
+              subtasks: (t.subtasks || []).map((s) =>
+                s.id === subtaskId ? { ...s, done: !s.done } : s
+              ),
+            }
+          : t
+      )
+    );
   };
 
   const updateStatus = (id, status) => {
@@ -189,5 +225,6 @@ export default function useTasks() {
     openAdd, openEdit, closeModal,
     saveTask, updateStatus, deleteTask, undoDelete,
     handleDragEnd,
+    addFormSubtask, removeFormSubtask, toggleSubtask,
   };
 }

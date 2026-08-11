@@ -13,12 +13,14 @@ function getDueDateInfo(dueDate, isDone) {
   return                     { label: `Due in ${diffDays}d`,               color: "#34d399", bg: "#0a2d1f", border: "#0f5c3a", icon: "📅" };
 }
 
-export default function TaskCard({ task, onStatus, onEdit, onDelete }) {
+export default function TaskCard({ task, onStatus, onEdit, onDelete, onToggleSubtask }) {
   const type = TYPE_META[task.type];
   const status = STATUS_META[task.status];
   const statusOrder = ["pending", "inprogress", "done"];
   const isDone = task.status === "done";
   const dueDateInfo = getDueDateInfo(task.dueDate, isDone);
+  const subtasks = task.subtasks || [];
+  const subtaskDoneCount = subtasks.filter((s) => s.done).length;
 
   return (
     <div
@@ -80,6 +82,21 @@ export default function TaskCard({ task, onStatus, onEdit, onDelete }) {
             >
               {status.icon} {status.label}
             </span>
+
+            {/* Subtask Progress Badge */}
+            {subtasks.length > 0 && (
+              <span
+                style={{
+                  fontSize: 11, fontWeight: 600, padding: "3px 10px",
+                  borderRadius: 100, background: "#161625",
+                  color: subtaskDoneCount === subtasks.length ? "#34d399" : "#94a3b8",
+                  border: `1px solid ${subtaskDoneCount === subtasks.length ? "#0f5c3a" : "#2a2a3e"}`,
+                  letterSpacing: "0.03em",
+                }}
+              >
+                ☑️ {subtaskDoneCount}/{subtasks.length}
+              </span>
+            )}
 
             {/* Due Date Badge */}
             {dueDateInfo && (
@@ -145,6 +162,37 @@ export default function TaskCard({ task, onStatus, onEdit, onDelete }) {
           <p style={{ fontSize: 12, color: "#4b5563", lineHeight: 1.6, marginBottom: 12 }}>
             {task.desc}
           </p>
+        )}
+
+        {/* Subtasks checklist */}
+        {subtasks.length > 0 && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 5, marginBottom: 12 }}>
+            {subtasks.map((s) => (
+              <label
+                key={s.id}
+                style={{
+                  display: "flex", alignItems: "flex-start", gap: 7,
+                  cursor: "pointer", userSelect: "none",
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={!!s.done}
+                  onChange={() => onToggleSubtask && onToggleSubtask(task.id, s.id)}
+                  style={{ marginTop: 2, cursor: "pointer", accentColor: "#1d4ed8", flexShrink: 0 }}
+                />
+                <span
+                  style={{
+                    fontSize: 12, lineHeight: 1.5,
+                    color: s.done ? "#374151" : "#94a3b8",
+                    textDecoration: s.done ? "line-through" : "none",
+                  }}
+                >
+                  {s.title}
+                </span>
+              </label>
+            ))}
+          </div>
         )}
 
         {/* Status buttons */}

@@ -45,7 +45,11 @@ export function applyAutoResets(tasks) {
   toReset.forEach(markReset);
   return tasks.map((t) =>
     toReset.includes(t.type) && t.status === "done"
-      ? { ...t, status: "pending" }
+      ? {
+          ...t,
+          status: "pending",
+          subtasks: (t.subtasks || []).map((s) => ({ ...s, done: false })),
+        }
       : t
   );
 }

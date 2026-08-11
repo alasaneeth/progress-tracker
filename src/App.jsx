@@ -22,6 +22,7 @@ export default function App() {
     openAdd, openEdit, closeModal,
     saveTask, updateStatus, deleteTask, undoDelete,
     handleDragEnd,
+    toggleSubtask,
   } = useTasks();
 
   return (
@@ -47,6 +48,7 @@ export default function App() {
             onEdit={openEdit}
             onDelete={deleteTask}
             onAdd={openAdd}
+            onToggleSubtask={toggleSubtask}
           />
         </div>
       </div>

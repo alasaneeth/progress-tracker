@@ -6,7 +6,7 @@ import {
 import SortableTaskCard from "./SortableTaskCard";
 import { STATUS_META } from "../constants/meta";
 
-export default function BoardColumn({ status, tasks, onStatus, onEdit, onDelete }) {
+export default function BoardColumn({ status, tasks, onStatus, onEdit, onDelete, onToggleSubtask }) {
   const meta = STATUS_META[status];
   const { setNodeRef, isOver } = useDroppable({ id: status });
 
@@ -97,6 +97,7 @@ export default function BoardColumn({ status, tasks, onStatus, onEdit, onDelete 
                 onStatus={onStatus}
                 onEdit={onEdit}
                 onDelete={onDelete}
+                onToggleSubtask={onToggleSubtask}
               />
             ))
           )}
