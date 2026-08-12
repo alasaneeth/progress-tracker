@@ -1,5 +1,15 @@
 import { TYPE_META, STATUS_META } from "../constants/meta";
 
+function getDayCount(task) {
+  if (task.type !== "daily" || !task.createdAt) return null;
+  const created = new Date(task.createdAt);
+  created.setHours(0, 0, 0, 0);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const diffDays = Math.round((today - created) / (1000 * 60 * 60 * 24)) + 1;
+  return diffDays < 1 ? 1 : diffDays;
+}
+
 function getDueDateInfo(dueDate, isDone) {
   if (!dueDate || isDone) return null;
   const today = new Date();
@@ -19,6 +29,7 @@ export default function TaskCard({ task, onStatus, onEdit, onDelete, onToggleSub
   const statusOrder = ["pending", "inprogress", "done"];
   const isDone = task.status === "done";
   const dueDateInfo = getDueDateInfo(task.dueDate, isDone);
+  const dayCount = getDayCount(task);
   const subtasks = task.subtasks || [];
   const subtaskDoneCount = subtasks.filter((s) => s.done).length;
 
@@ -82,6 +93,20 @@ export default function TaskCard({ task, onStatus, onEdit, onDelete, onToggleSub
             >
               {status.icon} {status.label}
             </span>
+
+            {/* Day Count Badge (daily tasks only) */}
+            {dayCount !== null && (
+              <span
+                style={{
+                  fontSize: 11, fontWeight: 600, padding: "3px 10px",
+                  borderRadius: 100, background: "#161625",
+                  color: "#60a5fa", border: "1px solid #1e3a5f",
+                  letterSpacing: "0.03em",
+                }}
+              >
+                🔥 Day {dayCount}
+              </span>
+            )}
 
             {/* Subtask Progress Badge */}
             {subtasks.length > 0 && (
